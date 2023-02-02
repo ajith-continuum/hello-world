@@ -1,6 +1,5 @@
 pipeline {
     agent any
-
     environment {
         version = "v1.0.0"
         github_org = "ajith-continuum"
