@@ -24,11 +24,11 @@ pipeline {
                 }
             }
         }
-		stage("Retrieve GitHub Token") {
+	stage("Retrieve GitHub Token") {
             steps {
                 withCredentials([aws(credentialsId: '32dcc7bc-4443-42d6-afbf-745bb62699b4', accessKeyIdVariable: 'AWS_ACCESS_KEY_ID', secretAccessKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     sh """
-                        export GITHUB_TOKEN=$(aws secretsmanager get-secret-value --secret-id github-token-1 --query SecretString --output text --region us-west-2 --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY)
+                        export GITHUB_TOKEN=${aws secretsmanager get-secret-value --secret-id github-token-1 --query SecretString --output text --region us-west-2 --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY}
                     """
                 }
             }
