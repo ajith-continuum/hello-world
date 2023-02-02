@@ -39,16 +39,15 @@ pipeline {
             }
         }
 	stage("Create GitHub Release") {
-	    steps {
-		script {
-		    // Retrieve the latest tag from the GitHub repository
-		    def latestTag = sh(returnStdout: true, script: 'git describe --abbrev=0 --tags').trim()
-	       	    def jenkinsCredentials = credentials('a6243903-beda-4824-904e-39250299a16a')
-		    def authorizationHeader = "Authorization: token ${jenkinsCredentials.password}"
-	            // Verify the SSL certificate of the API endpoint
-	            sh "curl -k --location --request POST --header '${authorizationHeader}' --header 'Content-Type: application/json' --data '{\"tag_name\":\"${latestTag}\",\"target_commitish\": \"master\",\"name\": \"${latestTag}\",\"body\": \"Release created by Jenkins\",\"draft\": false,\"prerelease\": false}' https://api.github.com/repos/${github_org}/${repository}/releases"
-		}
-	    }
+            steps {
+                script {
+                    // Retrieve the latest tag from the GitHub repository
+                    def latestTag = sh(returnStdout: true, script: 'git describe --abbrev=0 --tags').trim()
+                    echo "Latest tag: ${latestTag}"
+		    withCredentials([string(credentialsId: 'b6c45dd7-eab0-488d-a0d1-b3b6d2bc3145', variable: 'TOKEN')]) {
+                    sh "curl -X POST -H 'Authorization: token ${TOKEN}' -H 'Content-Type: application/json' -d '{\"tag_name\":\"${latestTag}\",\"target_commitish\": \"master\",\"name\": \"${latestTag}\",\"body\": \"Release created by Jenkins\",\"draft\": false,\"prerelease\": false}' https://api.github.com/repos/${github_org}/${repository}/releases"                               
+                }
+            }
         }
         stage('Clone Latest Release') {
            steps {
