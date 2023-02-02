@@ -32,7 +32,7 @@ pipeline {
                     def minor = parts[1].toInteger()
                     def patch = parts[2].toInteger()
                     def newVersion = "v${major}.${minor}.${patch + BUILD_NUMBER}"
-                    withCredentials([string(credentialsId: 'a6243903-beda-4824-904e-39250299a16a', variable: 'PAT')]) {
+                    withCredentials([string(credentialsId: 'github-pat', variable: 'PAT')]) {
   			sh "git push https://${PAT}@github.com/ajith-continuum/hello-world.git ${newVersion}"
 		    }
                 }
