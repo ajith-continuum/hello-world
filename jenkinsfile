@@ -50,25 +50,5 @@ pipeline {
                 }
             }
         }
-        stage('Clone Latest Release') {
-           steps {
-                sh 'git config --global advice.detachedHead false'
-                sh '''
-                    # Get the latest release tag
-                    release_tag=$(curl -s https://api.github.com/repos/${github_org}/${repository}/releases/latest | jq -r '.tag_name')
-                    
-                    # Check if the tag exists in the server
-                     if [ -d "/path/to/repo/${release_tag}" ]; then
-                        echo "Latest release & tag already exists"
-                    else
-                        # Remove the old directory if it exists
-                        rm -rf "/path/to/repo"
-                        git clone --branch ${release_tag} https://github.com/${github_org}/${repository}.git "/path/to/repo/${release_tag}"
-                        git config --global advice.detachedHead false
-                    fi
-                '''
-            
-            }
-        }
     }
 }
