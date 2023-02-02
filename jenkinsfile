@@ -24,15 +24,6 @@ pipeline {
                 }
             }
         }
-	stage("Retrieve GitHub Token") {
-            steps {
-                withCredentials([aws(credentialsId: '32dcc7bc-4443-42d6-afbf-745bb62699b4', accessKeyIdVariable: 'AWS_ACCESS_KEY_ID', secretAccessKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                    sh """
-                        export GITHUB_TOKEN=${aws secretsmanager get-secret-value --secret-id github-token-1 --query SecretString --output text --region us-west-2 --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY}
-                    """
-                }
-            }
-        }
         stage('Push Git Tag') {
             steps {
                 script {
@@ -51,15 +42,16 @@ pipeline {
             steps {
                 script {
                     // Retrieve the latest tag from the GitHub repository
-                    def latestTag = sh(returnStdout: true, script: 'git describe --abbrev=0 --tags').trim()
-
-                    sh "curl -X POST -H 'Authorization: token ${GITHUB_TOKEN}' -H 'Content-Type: application/json' -d '{\"tag_name\":\"${latestTag}\",\"target_commitish\": \"master\",\"name\": \"${latestTag}\",\"body\": \"Release created by Jenkins\",\"draft\": false,\"prerelease\": false}' https://api.github.com/repos/${github_org}/${repository}/releases"
+		    def latestTag = sh(returnStdout: true, script: 'git describe --abbrev=0 --tags').trim()
+		    def jenkinsCredentials = credentials('a6243903-beda-4824-904e-39250299a16a')
+		    def authorizationHeader = "Authorization: token ${jenkinsCredentials.password}"
+                    sh "curl -X POST -H '${authorizationHeader}' -H 'Content-Type: application/json' -d '{\"tag_name\":\"${latestTag}\",\"target_commitish\": \"master\",\"name\": \"${latestTag}\",\"body\": \"Release created by Jenkins\",\"draft\": false,\"prerelease\": false}' https://api.github.com/repos/${github_org}/${repository}/releases"
                 
                 }
             }
         }
         stage('Clone Latest Release') {
-            steps {
+           steps {
                 sh 'git config --global advice.detachedHead false'
                 sh '''
                     # Get the latest release tag
